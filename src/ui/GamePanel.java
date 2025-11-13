@@ -1,146 +1,104 @@
 package ui;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
-
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import model.Bishop;
-import model.Board;
-import model.King;
-import model.Knight;
-import model.Pawn;
-import model.Pieces;
-import model.Queen;
-import model.Rook;
-
-//Bàn cờ + các nút bên phải
-
+import ai.SimpleAI;
+import controller.GameController;
+import model.*;
 
 public class GamePanel extends JPanel implements Runnable {
-	// Cho giá trị cho chiều r, chiều d
-	final int MAX_WIDTH = 1400;
+	public GameController controller;
+	// SET:
+	final int MAX_WIDTH = 1000;
 	final int MAX_HEIGHT = 1000;
-	// Cho giá trị khung hình = 60
 	final int FPS = 60;
-	
-	
+	// THREAD: cho nó 1 luồng riêng
 	Thread gameThread;
+	// Bàn cờ
 	Board board = new Board();
+	// Xử lý sự kiện chuột
 	MouseHandler mouse = new MouseHandler();
-	
-	
-	
-	// PIECES
+	// Tạo quân cờ
 	public static ArrayList<Pieces> pieces = new ArrayList<>();
-	public static ArrayList<Pieces> simPieces = new ArrayList<>();
-	Pieces activePieces;
-	
-	// COLOR
+	Pieces activePiece;
+	// Tạo màu
 	public static final int WHITE = 1;
 	public static final int BLACK = 0;
+	// Set Default
 	int currentColor = WHITE;
-	
-	
-	
+       //Tạo một danh sách (ArrayList) chứa các mảng số nguyên (int[])
+       //— mỗi mảng int[] biểu diễn tọa độ ô hợp lệ trên bàn cờ.
+	ArrayList<int[]> validSquares = new ArrayList<>();
+
+	// TEST AI
+	private SimpleAI ai;
+	private boolean vsAI = true; // bật/tắt AI
+
 	
 	
 	public GamePanel() {
 		setPreferredSize(new Dimension(MAX_WIDTH, MAX_HEIGHT));
 		setBackground(new Color(0x2E, 0x66, 0x33));
-		
-		
+
 		addMouseListener(mouse);
 		addMouseMotionListener(mouse);
-		
-		
+
 		setPieces();
-		copyPices(pieces, simPieces);
-		
-		
-		
-		
+
+		// Khơi tạo AI TEST
+		ai = new SimpleAI(GamePanel.BLACK);
+
 	}
 
+	
+	
+	// CHẠY GAME
 	public void launchGame() {
 		gameThread = new Thread(this);
 		gameThread.start();
 	}
-	// ĐĂT QUÂN CỜ VÀO BÀN
+	// ĐẶT QUÂN CỜ
 	public void setPieces() {
-		
 		// WHITE_TEAM
-			// PAWN
-		pieces.add(new Pawn(WHITE, 0, 6));
-		pieces.add(new Pawn(WHITE, 1, 6));
-		pieces.add(new Pawn(WHITE, 2, 6));
-		pieces.add(new Pawn(WHITE, 3, 6));
-		pieces.add(new Pawn(WHITE, 4, 6));
-		pieces.add(new Pawn(WHITE, 5, 6));
-		pieces.add(new Pawn(WHITE, 6, 6));
-		pieces.add(new Pawn(WHITE, 7, 6));
-			// KING
+		for (int i = 0; i < 8; i++)
+			pieces.add(new Pawn(WHITE, i, 6));
 		pieces.add(new King(WHITE, 4, 7));
-			// QUEEN
-		pieces.add(new Queen(WHITE, 3, 7));	
-			// BISHOP
+		pieces.add(new Queen(WHITE, 3, 7));
 		pieces.add(new Bishop(WHITE, 2, 7));
 		pieces.add(new Bishop(WHITE, 5, 7));
-			// ROOK
 		pieces.add(new Rook(WHITE, 0, 7));
 		pieces.add(new Rook(WHITE, 7, 7));
-			// KNIGHT
 		pieces.add(new Knight(WHITE, 1, 7));
 		pieces.add(new Knight(WHITE, 6, 7));
-		
-			// BLACK_TEAM
-			// PAWN
-		pieces.add(new Pawn(BLACK, 0, 1));
-		pieces.add(new Pawn(BLACK, 1, 1));
-		pieces.add(new Pawn(BLACK, 2, 1));
-		pieces.add(new Pawn(BLACK, 3, 1));
-		pieces.add(new Pawn(BLACK, 4, 1));
-		pieces.add(new Pawn(BLACK, 5, 1));
-		pieces.add(new Pawn(BLACK, 6, 1));
-		pieces.add(new Pawn(BLACK, 7, 1));
-			// KING
+
+		// BLACK_TEAM
+		for (int i = 0; i < 8; i++)
+			pieces.add(new Pawn(BLACK, i, 1));
 		pieces.add(new King(BLACK, 4, 0));
-			// QUEEN
-		pieces.add(new Queen(BLACK, 3, 0));	
-			// BISHOP
+		pieces.add(new Queen(BLACK, 3, 0));
 		pieces.add(new Bishop(BLACK, 2, 0));
 		pieces.add(new Bishop(BLACK, 5, 0));
-			// ROOK
 		pieces.add(new Rook(BLACK, 0, 0));
 		pieces.add(new Rook(BLACK, 7, 0));
-			// KNIGHT
 		pieces.add(new Knight(BLACK, 1, 0));
 		pieces.add(new Knight(BLACK, 6, 0));
 	}
-	public void copyPices(ArrayList<Pieces> src, ArrayList<Pieces> target) {
-		target.clear();
-		for(int i=0; i<src.size();i++) {
-			target.add(src.get(i));
-		}
-	}
-	
-	
-	
+	// CHẠY - FPS
 	@Override
 	public void run() {
-		// GAME LOOP
-		double drawInterval = 1000000000 / FPS;
+		double drawInterval = 1000000000.0 / FPS;
 		double delta = 0;
 		long lastTime = System.nanoTime();
 		long currentTime;
 
 		while (gameThread != null) {
 			currentTime = System.nanoTime();
-
 			delta += (currentTime - lastTime) / drawInterval;
 			lastTime = currentTime;
 
@@ -149,82 +107,166 @@ public class GamePanel extends JPanel implements Runnable {
 				repaint();
 				delta--;
 			}
-
 		}
-
 	}
-
+	// VẼ - UPDATE: các thay đổi
 	public void update() {
-	    if (mouse.clicked) {
-	        int clickedCol = (mouse.mouseX - Board.offsetX) / Board.SQUARE_SIZE;
-	        int clickedRow = (mouse.mouseY - Board.offsetY) / Board.SQUARE_SIZE;
-
-	        // Kiểm tra có quân nào tại vị trí click
-	        Pieces clickedPiece = getPieceAt(clickedCol, clickedRow);
-
-	        if (activePieces == null) {
-	            // Lần đầu: chọn quân
-	            if (clickedPiece != null && clickedPiece.color == currentColor) {
-	                activePieces = clickedPiece;
-	            }
-	        } else {
-	            // Lần hai: nếu click vào ô mới
-	            if (clickedPiece == null || clickedPiece.color != activePieces.color) {
-	                // Di chuyển quân
-	                activePieces.col = clickedCol;
-	                activePieces.row = clickedRow;
-	                activePieces.x = activePieces.getX(clickedCol);
-	                activePieces.y = activePieces.getY(clickedRow);
-
-	                // Đổi lượt
-	                currentColor = (currentColor == WHITE) ? BLACK : WHITE;
-	            }
-
-	            // Bỏ chọn sau khi di chuyển
-	            activePieces = null;
-	        }
-
-	        // Chỉ xử lý 1 lần mỗi click
-	        mouse.clicked = false;
-	    }
-	}
-
-
-
-
-	private Pieces getPieceAt(int col, int row) {
-	    for (Pieces p : simPieces) {
-	        if (p.col == col && p.row == row) {
-	            return p;
-	        }
-	    }
-	    return null;
-	}
-
-	public void paintComponent(Graphics g) {
-		
-		super.paintComponent(g);
-		Graphics2D g2 = (Graphics2D)g;
-		board.draw(g2);
-		//
-		if (activePieces != null) {
-		    g2.setColor(new Color(0, 255, 0, 100)); 
-		    int highlightX = Board.offsetX + activePieces.col * Board.SQUARE_SIZE;
-		    int highlightY = Board.offsetY + activePieces.row * Board.SQUARE_SIZE;
-		    g2.fillRect(highlightX, highlightY, Board.SQUARE_SIZE, Board.SQUARE_SIZE);
+		// Nếu đã có người thắng, không update nữa
+		if (controller != null && controller.getWinner() != null) {
+			return;
 		}
 
-		// PIECES
-		for(Pieces p:simPieces) {
-				p.draw(g2);
-	        
-				
-				
-	
-	    }
-		g2.dispose();	
+		if (mouse.clicked) {
+			int clickedCol = (mouse.mouseX - Board.offsetX) / Board.SQUARE_SIZE;
+			int clickedRow = (mouse.mouseY - Board.offsetY) / Board.SQUARE_SIZE;
+
+			// Click ngoài board
+			if (clickedCol < 0 || clickedCol > 7 || clickedRow < 0 || clickedRow > 7) {
+				mouse.clicked = false;
+				return;
+			}
+
+			Pieces clickedPiece = getPieceAt(clickedCol, clickedRow);
+
+			// Chọn quân
+			if (activePiece == null) {
+				if (clickedPiece != null && clickedPiece.color == currentColor) {
+					activePiece = clickedPiece;
+					simulateValidMoves(activePiece);
+				}
+			}
+			// Di chuyển quân
+			else {
+				boolean moved = false;
+				for (int[] sq : validSquares) {
+					if (sq[0] == clickedCol && sq[1] == clickedRow) {
+						movePiece(activePiece, clickedCol, clickedRow);
+						moved = true;
+						break;
+					}
+				}
+
+				activePiece = null;
+				validSquares.clear();
+
+				if (moved) {
+					currentColor = (currentColor == WHITE) ? BLACK : WHITE;
+
+					// Nếu đã thắng, không cho AI đi
+					if (vsAI && currentColor == BLACK && controller.getWinner() == null && controller.getAI() != null) {
+						int[] move = controller.getAI().chooseMove(pieces);
+						if (move != null) {
+							Pieces p = pieces.get(move[4]);
+							movePiece(p, move[2], move[3]);
+							currentColor = WHITE;
+						}
+					}
+				}
+
+			}
+		}
+
+		mouse.clicked = false;
 	}
-	
-	
+	// tìm các ô hợp lệ mà quân p có thể di chuyển đến,
+	// và lưu lại trong danh sách validSquares.
+	private void simulateValidMoves(Pieces p) {
+		validSquares.clear();
+		for (int c = 0; c < 8; c++) {
+			for (int r = 0; r < 8; r++) {
+				if (p.canMove(c, r)) {
+					validSquares.add(new int[] { c, r });
+				}
+			}
+		}
+	}
+	// DINH CHUYỂN
+	private void movePiece(Pieces piece, int col, int row) {
+		Pieces target = getPieceAt(col, row);
+
+		int oldCol = piece.col; // tọa độ trước khi di chuyển
+		int oldRow = piece.row;
+
+		// Cập nhật vị trí quân
+		piece.col = col;
+		piece.row = row;
+		piece.x = piece.getX(col);
+		piece.y = piece.getY(row);
+
+		// Thông báo cho controller để log
+		controller.onMove(piece, oldCol, oldRow, col, row, target);
+
+		// Xử lý phong hậu cho Pawn
+		if (piece instanceof Pawn) {
+			if ((piece.color == WHITE && row == 0) || (piece.color == BLACK && row == 7)) {
+				Pieces newQueen = new Queen(piece.color, col, row);
+				pieces.remove(piece);
+				pieces.add(newQueen);
+			}
+		}
+
+		// Xóa quân bị ăn
+		if (target != null)
+			pieces.remove(target);
+		// NGĂT GAME NGAY KHI CÓ NGƯỜI THẮNG
+		if (controller.getWinner() != null) {
+			System.out.println(controller.getWinner() + " thắng!");
+			return; // không cho AI đi nữa
+		}
+	}
+	// Trả về quân cờ tại vị trí (col, row), nếu ô trống thì trả về null
+	public Pieces getPieceAt(int col, int row) {
+		for (Pieces p : pieces) {
+			if (p.col == col && p.row == row)
+				return p;
+		}
+		return null;
+	}
+	// Khởi tạo lại bàn cờ cho ván mới - NÚT: GAME MỚI
+	public void resetBoard() {
+		pieces.clear();
+		setPieces();
+		activePiece = null;
+		validSquares.clear();
+		currentColor = WHITE;
+		gameThread = new Thread(this);
+		gameThread.start();
+	}
+	// VẼ 
+	@Override
+	protected void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		Graphics2D g2 = (Graphics2D) g;
+
+		board.draw(g2);
+
+		// Highlight ô hợp lệ
+		if (!validSquares.isEmpty()) {
+			g2.setColor(new Color(50, 205, 50, 180));
+			g2.setStroke(new BasicStroke(10));
+			for (int[] sq : validSquares) {
+				int x = Board.offsetX + sq[0] * Board.SQUARE_SIZE;
+				int y = Board.offsetY + sq[1] * Board.SQUARE_SIZE;
+				g2.drawRect(x, y, Board.SQUARE_SIZE, Board.SQUARE_SIZE);
+			}
+
+		}
+		if (activePiece != null) {
+			g2.setColor(new Color(200, 0, 0, 180));
+			g2.fillRect(Board.offsetX + activePiece.col * Board.SQUARE_SIZE,
+					Board.offsetY + activePiece.row * Board.SQUARE_SIZE, Board.SQUARE_SIZE, Board.SQUARE_SIZE);
+		}
+
+		// Vẽ quân
+		for (Pieces p : pieces) {
+			p.draw(g2);
+		}
+
+		g2.dispose();
+	}
+
+	public void setController(GameController controller) {
+		this.controller = controller;
+	}
 
 }
