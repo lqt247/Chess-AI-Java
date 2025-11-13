@@ -19,5 +19,46 @@ public class Pawn extends Pieces {
 
 		}
 	}
+	// NƯỚC MÀ QUÂN CÓ THỂ ĐI
+	@Override
+	public boolean canMove(int targetCol, int targetRow) {
+	    // Không đi ra ngoài board
+	    if (!isWithInBoard(targetCol, targetRow)) return false;
+
+	    int dir = (color == GamePanel.WHITE) ? -1 : 1; // WHITE đi lên, BLACK đi xuống
+	    int startRow = (color == GamePanel.WHITE) ? 6 : 1;
+
+	    // ---- Đi thẳng ----
+	    if (targetCol == col) {
+	        // 1 ô trước
+	        if (targetRow == row + dir && getPieceAt(targetCol, targetRow) == null)
+	            return true;
+
+	        // 2 ô đầu tiên
+	        if (row == startRow && targetRow == row + 2*dir && 
+	            getPieceAt(targetCol, row + dir) == null &&
+	            getPieceAt(targetCol, targetRow) == null)
+	            return true;
+	    }
+
+	    // ---- Ăn quân chéo ----
+	    if ((targetCol == col + 1 || targetCol == col -1) &&
+	        targetRow == row + dir) {
+	        Pieces target = getPieceAt(targetCol, targetRow);
+	        if (target != null && target.color != this.color)
+	            return true;
+	    }
+
+	    return false;
+	}
+
+	// Helper để kiểm tra có quân ở ô target
+	protected Pieces getPieceAt(int col, int row) {
+	    for (Pieces p : GamePanel.pieces) {
+	        if (p.col == col && p.row == row) return p;
+	    }
+	    return null;
+	}
+	
 
 }
