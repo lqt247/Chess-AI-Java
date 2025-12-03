@@ -15,6 +15,7 @@ public class Knight extends Pieces {
 			image = ImageLoader.load("/accet_pieces/b-knight-pieces.png");
 		}
 	}
+	// NƯỚC MÀ QUÂN CÓ THỂ ĐI
 	@Override
 	public boolean canMove(int targetCol, int targetRow) {
 	    if (!isWithInBoard(targetCol, targetRow)) return false;

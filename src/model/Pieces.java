@@ -2,6 +2,7 @@ package model;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 import ui.GamePanel;
 
@@ -18,7 +19,23 @@ public class Pieces {
 		x = getX(col);
 		y = getY(row);
 	}
+	public boolean hasMoved = false;
 
+	protected Pieces getPiecesAt(int col, int row) {
+		for (Pieces p : GamePanel.pieces)
+			if (p.col == col && p.row == row)
+				return p;
+		return null;
+	}
+	public Pieces clonePiece() {
+	    try {
+	        return (Pieces) this.clone();
+	    } catch (Exception e) {
+	        return null;
+	    }
+	}
+	
+	
 	public int getX(int col) {
 		return Board.offsetX + col * Board.SQUARE_SIZE;
 	}
@@ -50,21 +67,24 @@ public class Pieces {
 			return false; // không di chuyển tại chỗ
 		return false;
 	}
-
+	// CHECK ĐỒNG MINH
 	protected boolean isAllyPiece(int targetCol, int targetRow) {
-		Pieces target = getPieceAt(targetCol, targetRow);
+		Pieces target = getPiecesAt(targetCol, targetRow);
 		return target != null && target.color == this.color;
 	}
 
-	protected Pieces getPieceAt(int col, int row) {
-		for (Pieces p : GamePanel.pieces)
-			if (p.col == col && p.row == row)
-				return p;
-		return null;
-	}
+
 
 	public void draw(Graphics2D g2) {
 		if (image != null)
 			g2.drawImage(image, x, y, Board.SQUARE_SIZE, Board.SQUARE_SIZE, null);
+	}
+	public ArrayList<int[]> getValidMoves() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	public int getValue() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

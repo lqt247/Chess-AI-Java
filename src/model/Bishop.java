@@ -33,7 +33,7 @@ public class Bishop extends Pieces {
 	    int c = col + stepCol;
 	    int r = row + stepRow;
 	    while (c != targetCol) {
-	        if (getPieceAt(c, r) != null) return false;
+	        if (getPiecesAt(c, r) != null) return false;
 	        c += stepCol;
 	        r += stepRow;
 	    }

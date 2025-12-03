@@ -31,20 +31,20 @@ public class Pawn extends Pieces {
 	    // ---- Đi thẳng ----
 	    if (targetCol == col) {
 	        // 1 ô trước
-	        if (targetRow == row + dir && getPieceAt(targetCol, targetRow) == null)
+	        if (targetRow == row + dir && getPiecesAt(targetCol, targetRow) == null)
 	            return true;
 
 	        // 2 ô đầu tiên
 	        if (row == startRow && targetRow == row + 2*dir && 
-	            getPieceAt(targetCol, row + dir) == null &&
-	            getPieceAt(targetCol, targetRow) == null)
+	            getPiecesAt(targetCol, row + dir) == null &&
+	            getPiecesAt(targetCol, targetRow) == null)
 	            return true;
 	    }
 
 	    // ---- Ăn quân chéo ----
 	    if ((targetCol == col + 1 || targetCol == col -1) &&
 	        targetRow == row + dir) {
-	        Pieces target = getPieceAt(targetCol, targetRow);
+	        Pieces target = getPiecesAt(targetCol, targetRow);
 	        if (target != null && target.color != this.color)
 	            return true;
 	    }
@@ -52,13 +52,7 @@ public class Pawn extends Pieces {
 	    return false;
 	}
 
-	// Helper để kiểm tra có quân ở ô target
-	protected Pieces getPieceAt(int col, int row) {
-	    for (Pieces p : GamePanel.pieces) {
-	        if (p.col == col && p.row == row) return p;
-	    }
-	    return null;
-	}
+
 	
 
 }

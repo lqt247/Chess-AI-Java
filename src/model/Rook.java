@@ -26,12 +26,12 @@ public class Rook extends Pieces {
 	    if (targetCol == col) { // cùng cột
 	        int dir = (targetRow > row) ? 1 : -1;
 	        for (int r = row + dir; r != targetRow; r += dir)
-	            if (getPieceAt(col, r) != null) return false;
+	            if (getPiecesAt(col, r) != null) return false;
 	        return !isAllyPiece(targetCol, targetRow);
 	    } else if (targetRow == row) { // cùng hàng
 	        int dir = (targetCol > col) ? 1 : -1;
 	        for (int c = col + dir; c != targetCol; c += dir)
-	            if (getPieceAt(c, row) != null) return false;
+	            if (getPiecesAt(c, row) != null) return false;
 	        return !isAllyPiece(targetCol, targetRow);
 	    }
 	    return false;

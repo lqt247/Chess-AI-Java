@@ -11,8 +11,10 @@ public class GameController {
 	private ControlPanel controlPanel;
 	private int currentPlayer;
 	private String winner;
+	// Move Logger
 	private MoveLoger moveLogger;
-	private AI ai; // AI player
+	// AI player
+	private AI ai; 
 
 	public GameController(GamePanel gp, ControlPanel cp, AI ai) {
 		this.gamePanel = gp;

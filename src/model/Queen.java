@@ -16,7 +16,7 @@ public class Queen extends Pieces {
 			image = ImageLoader.load("/accet_pieces/b-queen-pieces.png");
 		}
 	}
-
+	// NƯỚC MÀ QUÂN CÓ THỂ ĐI
 	@Override
 	public boolean canMove(int targetCol, int targetRow) {
 		if (!isWithInBoard(targetCol, targetRow))

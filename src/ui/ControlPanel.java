@@ -101,7 +101,7 @@ public class ControlPanel extends JPanel {
             }
         });
         
-        turnLabel = new JLabel("Lượt: Trắng");
+        turnLabel = new JLabel("Lượt: ");
         winnerLabel = new JLabel("");
 
         buttons.add(newGameButton);
