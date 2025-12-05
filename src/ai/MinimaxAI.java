@@ -1,86 +1,74 @@
 package ai;
 
-import model.Pieces;
 import java.util.ArrayList;
+import controller.Rules;
+import model.Pieces;
 
-public class MinimaxAI implements AI {
-    private int depth;
-	private int color;
+public class MinimaxAI implements AI { // ✅ implement AI
 
-    public MinimaxAI(int color, int depth) {
-        super();
-        this.depth = depth;
+    private int aiColor;
+    private int maxDepth;
+
+    public MinimaxAI(int aiColor, int depth) {
+        this.aiColor = aiColor;
+        this.maxDepth = depth;
     }
 
     @Override
-    public int[] chooseMove(ArrayList<Pieces> pieces) {
-        int bestScore = Integer.MIN_VALUE;
-        int[] bestMove = null;
+    public int[] chooseMove(ArrayList<Pieces> board) {
+        MoveScore best = minimax(board, maxDepth, aiColor, true);
+        return best.move;
+    }
 
-        for (Pieces p : pieces) {
-            if (p.color != this.color) continue; // chỉ xét quân AI
-            ArrayList<int[]> moves = p.getValidMoves(); // hoặc simulateValidMoves
-            for (int[] move : moves) {
-                Pieces target = getPieceAt(move[0], move[1]);
-                makeMove(p, move[0], move[1]);
-                int score = minimax(pieces, depth - 1, false);
-                undoMove(p, move[0], move[1], target);
+    private MoveScore minimax(ArrayList<Pieces> board, int depth, int turnColor, boolean isMaximizing) {
+        ArrayList<int[]> legalMoves = Rules.getLegalMoves(board, turnColor);
 
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestMove = new int[]{p.col, p.row, move[0], move[1], pieces.indexOf(p)};
+        if (depth == 0 || legalMoves.isEmpty()) {
+            int score = ai.Heuristic.evaluate(board, aiColor);
+            return new MoveScore(null, score);
+        }
+
+        MoveScore best = null;
+
+        for (int[] move : legalMoves) {
+            ArrayList<Pieces> clone = cloneBoard(board);
+
+            // Thực hiện nước đi trên clone
+            Pieces moving = clone.get(move[4]);
+            for (int i = 0; i < clone.size(); i++) {
+                Pieces p = clone.get(i);
+                if (p.col == move[2] && p.row == move[3] && p.color != moving.color) {
+                    clone.remove(i);
+                    break;
                 }
+            }
+
+            moving.col = move[2];
+            moving.row = move[3];
+
+            int nextTurn = (turnColor == 1) ? 0 : 1;
+            MoveScore result = minimax(clone, depth - 1, nextTurn, !isMaximizing);
+
+            if (best == null) best = new MoveScore(move, result.score);
+            else {
+                if (isMaximizing && result.score > best.score) best = new MoveScore(move, result.score);
+                if (!isMaximizing && result.score < best.score) best = new MoveScore(move, result.score);
             }
         }
 
-        return bestMove;
+        if (best == null) return new MoveScore(null, ai.Heuristic.evaluate(board, aiColor));
+        return best;
     }
 
-    private Pieces getPieceAt(int i, int j) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	private int minimax(ArrayList<Pieces> pieces, int depth, boolean maxTurn) {
-        if (depth == 0) return evaluateBoard(pieces);
-
-        if (maxTurn) {
-            int maxEval = Integer.MIN_VALUE;
-            for (Pieces p : pieces) {
-                if (p.color != this.color) continue;
-                for (int[] move : p.getValidMoves()) {
-                    Pieces target = getPieceAt(move[0], move[1]);
-                    makeMove(p, move[0], move[1]);
-                    int eval = minimax(pieces, depth - 1, false);
-                    undoMove(p, move[0], move[1], target);
-                    maxEval = Math.max(maxEval, eval);
-                }
-            }
-            return maxEval;
-        } else {
-            int minEval = Integer.MAX_VALUE;
-            for (Pieces p : pieces) {
-                if (p.color == this.color) continue;
-                for (int[] move : p.getValidMoves()) {
-                    Pieces target = getPieceAt(move[0], move[1]);
-                    makeMove(p, move[0], move[1]);
-                    int eval = minimax(pieces, depth - 1, true);
-                    undoMove(p, move[0], move[1], target);
-                    minEval = Math.min(minEval, eval);
-                }
-            }
-            return minEval;
-        }
+    private ArrayList<Pieces> cloneBoard(ArrayList<Pieces> board) {
+        ArrayList<Pieces> clone = new ArrayList<>();
+        for (Pieces p : board) clone.add(p.copy());
+        return clone;
     }
 
-    private int evaluateBoard(ArrayList<Pieces> pieces) {
-        int score = 0;
-        for (Pieces p : pieces) {
-            score += (p.color == this.color ? 1 : -1) * p.getValue();
-        }
-        return score;
+    private static class MoveScore {
+        int[] move;
+        int score;
+        MoveScore(int[] m, int s) { move = m; score = s; }
     }
-
-    private void makeMove(Pieces p, int col, int row) { /* update bàn cờ */ }
-    private void undoMove(Pieces p, int col, int row, Pieces target) { /* quay lại */ }
 }

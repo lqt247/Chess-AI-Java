@@ -1,6 +1,7 @@
 package model;
 
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 import ui.GamePanel;
 import utils.ImageLoader;
@@ -18,15 +19,36 @@ public class Knight extends Pieces {
 	// NƯỚC MÀ QUÂN CÓ THỂ ĐI
 	@Override
 	public boolean canMove(int targetCol, int targetRow) {
-	    if (!isWithInBoard(targetCol, targetRow)) return false;
+	    int diffCol = Math.abs(targetCol - col);
+	    int diffRow = Math.abs(targetRow - row);
 
-	    int dCol = Math.abs(targetCol - col);
-	    int dRow = Math.abs(targetRow - row);
-
-	    if ((dCol == 2 && dRow == 1) || (dCol == 1 && dRow == 2))
-	        return !isAllyPiece(targetCol, targetRow);
-
+	    // kiểm tra chữ L
+	    if ((diffCol == 2 && diffRow == 1) || (diffCol == 1 && diffRow == 2)) {
+	        Pieces target = getPiecesAt(targetCol, targetRow);
+	        return target == null || target.color != this.color;
+	    }
 	    return false;
 	}
+	@Override
+	public boolean canMoveSim(ArrayList<Pieces> board, int targetCol, int targetRow) {
+	    int dc = Math.abs(targetCol - col);
+	    int dr = Math.abs(targetRow - row);
+	    if (!((dc == 2 && dr == 1) || (dc == 1 && dr == 2))) return false;
+
+	    Pieces target = getPiecesAtSim(board, targetCol, targetRow);
+	    return target == null || target.color != color;
+	}
+
+	
+	
+	@Override
+	public Pieces copy() {
+	    Knight k = new Knight(this.color, this.col, this.row);
+	    k.hasMoved = this.hasMoved;
+	    k.preCol = this.preCol;
+	    k.preRow = this.preRow;
+	    return k;
+	}
+
 
 }

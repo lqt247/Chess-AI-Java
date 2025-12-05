@@ -1,6 +1,7 @@
 package model;
 
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 import ui.GamePanel;
 import utils.ImageLoader;
@@ -22,19 +23,20 @@ public class King extends Pieces {
 	public boolean canMove(int targetCol, int targetRow) {
 	    if (!isWithInBoard(targetCol, targetRow)) return false;
 
-	    int dCol = targetCol - col;
+	    int dCol = Math.abs(targetCol - col);
 	    int dRow = Math.abs(targetRow - row);
 
-	    // Di chuyển 1 ô bình thường
-	    if (Math.abs(dCol) <= 1 && dRow <= 1)
+	    // ===== ĐI 1 Ô =====
+	    if (dCol <= 1 && dRow <= 1)
 	        return !isAllyPiece(targetCol, targetRow);
 
-	    // Nhập thành: chỉ được đi 2 ô sang trái hoặc phải, cùng hàng, chưa di chuyển, ô giữa trống
-	    if (!hasMoved && dRow == 0 && Math.abs(dCol) == 2) {
-	        int rookCol = (dCol > 0) ? 7 : 0;
+	    // ===== NHẬP THÀNH =====
+	    if (!hasMoved && dRow == 0 && dCol == 2) {
+	        int rookCol = (targetCol > col) ? 7 : 0;
 	        Pieces rook = getPiecesAt(rookCol, row);
-	        if (rook instanceof Rook && !((Rook) rook).hasMoved) {
-	            int step = (dCol > 0) ? 1 : -1;
+
+	        if (rook instanceof Rook && !rook.hasMoved) {
+	            int step = (targetCol > col) ? 1 : -1;
 	            for (int c = col + step; c != rookCol; c += step) {
 	                if (getPiecesAt(c, row) != null) return false;
 	            }
@@ -44,6 +46,32 @@ public class King extends Pieces {
 
 	    return false;
 	}
+	@Override
+	public boolean canMoveSim(ArrayList<Pieces> board, int targetCol, int targetRow) {
+	    int dc = targetCol - col;
+	    int dr = targetRow - row;
+
+	    if (Math.abs(dc) > 1 || Math.abs(dr) > 1) return false;
+
+	    Pieces target = getPiecesAtSim(board, targetCol, targetRow);
+	    return target == null || target.color != this.color;
+	}
+
+
+
+
+
+
+
+	@Override
+	public Pieces copy() {
+	    King k = new King(this.color, this.col, this.row);
+	    k.hasMoved = this.hasMoved;
+	    k.preCol = this.preCol;
+	    k.preRow = this.preRow;
+	    return k;
+	}
+	
 
 
 }

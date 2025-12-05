@@ -29,7 +29,6 @@ public class GameFrame extends JFrame {
         setLocationRelativeTo(null);
         setVisible(true);
 
-        gamePanel.launchGame();
     }
 
     public static void main(String[] args) {

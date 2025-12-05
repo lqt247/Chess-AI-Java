@@ -7,84 +7,120 @@ import java.util.ArrayList;
 import ui.GamePanel;
 
 public class Pieces {
-	public BufferedImage image;
-	public int col, row, preCol, preRow;
-	public int color;
-	public int x, y;
+    public BufferedImage image;
+    public int col, row;
+    public int preCol, preRow;
+    public int color;
+    public int x, y;
+    public boolean hasMoved = false;
 
-	public Pieces(int color, int col, int row) {
-		this.color = color;
-		this.col = col;
-		this.row = row;
-		x = getX(col);
-		y = getY(row);
-	}
-	public boolean hasMoved = false;
+    public Pieces(int color, int col, int row) {
+        this.color = color;
+        this.col = col;
+        this.row = row;
+        x = getX(col);
+        y = getY(row);
+    }
 
-	protected Pieces getPiecesAt(int col, int row) {
-		for (Pieces p : GamePanel.pieces)
-			if (p.col == col && p.row == row)
-				return p;
-		return null;
-	}
-	public Pieces clonePiece() {
-	    try {
-	        return (Pieces) this.clone();
-	    } catch (Exception e) {
-	        return null;
-	    }
-	}
-	
-	
-	public int getX(int col) {
-		return Board.offsetX + col * Board.SQUARE_SIZE;
-	}
+    // ===== GAME THẬT =====
+    protected Pieces getPiecesAt(int col, int row) {
+        for (Pieces p : GamePanel.pieces) {
+            if (p.col == col && p.row == row)
+                return p;
+        }
+        return null;
+    }
 
-	public int getY(int row) {
-		return Board.offsetY + row * Board.SQUARE_SIZE;
-	}
+    // ===== AI / MINIMAX =====
+    protected Pieces getPiecesAt(ArrayList<Pieces> list, int col, int row) {
+        for (Pieces p : list) {
+            if (p.col == col && p.row == row)
+                return p;
+        }
+        return null;
+    }
 
-	public int getCol(int x) {
-		return (x - Board.offsetX) / Board.SQUARE_SIZE;
-	}
+    // ✅ COPY ĐÚNG LOẠI QUÂN
+    public Pieces copy() {
+        if (this instanceof Pawn)   return new Pawn(color, col, row);
+        if (this instanceof Rook)   return new Rook(color, col, row);
+        if (this instanceof Knight) return new Knight(color, col, row);
+        if (this instanceof Bishop) return new Bishop(color, col, row);
+        if (this instanceof Queen)  return new Queen(color, col, row);
+        if (this instanceof King)   return new King(color, col, row);
+        return new Pieces(color, col, row);
+    }
 
-	public int getRow(int y) {
-		return (y - Board.offsetY) / Board.SQUARE_SIZE;
-	}
+    public int getX(int col) {
+        return Board.offsetX + col * Board.SQUARE_SIZE;
+    }
 
-	public boolean isWithInBoard(int targetCol, int targetRow) {
-		if (targetCol >= 0 && targetCol <= 7 && targetRow >= 0 && targetRow <= 7) {
-			return true;
-		}
-		return false;
-	}
+    public int getY(int row) {
+        return Board.offsetY + row * Board.SQUARE_SIZE;
+    }
 
-	// NƯỚC MÀ QUÂN CÓ THỂ ĐI
-	public boolean canMove(int targetCol, int targetRow) {
-		if (!isWithInBoard(targetCol, targetRow))
-			return false;
-		if (targetCol == col && targetRow == row)
-			return false; // không di chuyển tại chỗ
-		return false;
-	}
-	// CHECK ĐỒNG MINH
-	protected boolean isAllyPiece(int targetCol, int targetRow) {
-		Pieces target = getPiecesAt(targetCol, targetRow);
-		return target != null && target.color == this.color;
-	}
+    public boolean isWithInBoard(int targetCol, int targetRow) {
+        return targetCol >= 0 && targetCol <= 7 && targetRow >= 0 && targetRow <= 7;
+    }
 
+    // ===== BASE METHOD =====
+    public boolean canMove(int targetCol, int targetRow) {
+        if (!isWithInBoard(targetCol, targetRow)) return false;
+        if (targetCol == col && targetRow == row) return false;
+        return false;
+    }
 
+    // ===== ALLY CHECK =====
+    protected boolean isAllyPiece(int targetCol, int targetRow) {
+        Pieces target = getPiecesAt(targetCol, targetRow);
+        return target != null && target.color == this.color;
+    }
 
-	public void draw(Graphics2D g2) {
-		if (image != null)
-			g2.drawImage(image, x, y, Board.SQUARE_SIZE, Board.SQUARE_SIZE, null);
-	}
-	public ArrayList<int[]> getValidMoves() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	public int getValue() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+    protected boolean isAllyPiece(ArrayList<Pieces> list, int targetCol, int targetRow) {
+        Pieces target = getPiecesAt(list, targetCol, targetRow);
+        return target != null && target.color == this.color;
+    }
+
+    public void draw(Graphics2D g2) {
+        if (image != null)
+            g2.drawImage(image, x, y, Board.SQUARE_SIZE, Board.SQUARE_SIZE, null);
+    }
+
+    // ===== AI SUPPORT =====
+    public ArrayList<int[]> getValidMoves(ArrayList<Pieces> board) {
+        return new ArrayList<>();
+    }
+
+    public int getValue() {
+        return 0;
+    }
+
+    // ===== SUPPORT SIMULATION =====
+    protected Pieces getPiecesAtSim(ArrayList<Pieces> board, int col, int row) {
+        for (Pieces p : board) {
+            if (p.col == col && p.row == row)
+                return p;
+        }
+        return null;
+    }
+
+    protected boolean isEnemySim(ArrayList<Pieces> board, int col, int row) {
+        Pieces p = getPiecesAtSim(board, col, row);
+        return p != null && p.color != this.color;
+    }
+
+    protected boolean isEmptySim(ArrayList<Pieces> board, int col, int row) {
+        return getPiecesAtSim(board, col, row) == null;
+    }
+
+    // ===== MẶC ĐỊNH CHO SIMULATION / AI =====
+    // ✅ Rất an toàn, không bao giờ đứng game
+    public boolean canMoveSim(ArrayList<Pieces> board, int targetCol, int targetRow) {
+        // Mặc định: chỉ kiểm tra ô trống / đồng minh, không logic quân
+        if (!isWithInBoard(targetCol, targetRow)) return false;
+        if (targetCol == col && targetRow == row) return false;
+
+        Pieces target = getPiecesAtSim(board, targetCol, targetRow);
+        return target == null || target.color != this.color;
+    }
 }

@@ -1,7 +1,9 @@
 eclipse.preferences.version=1
 encoding//src/ai/Heuristic.java=UTF-8
+encoding//src/ai/MinimaxAI.java=UTF-8
 encoding//src/ai/SimpleAI.java=UTF-8
 encoding//src/controller/GameController.java=UTF-8
+encoding//src/controller/Rules.java=UTF-8
 encoding//src/main/GameFrame.java=UTF-8
 encoding//src/main/Main.java=UTF-8
 encoding//src/model/Bishop.java=UTF-8
@@ -14,5 +16,6 @@ encoding//src/model/Queen.java=UTF-8
 encoding//src/model/Rook.java=UTF-8
 encoding//src/ui/ControlPanel.java=UTF-8
 encoding//src/ui/GamePanel.java=UTF-8
+encoding//src/ui/MouseHandler.java=UTF-8
 encoding//src/utils/ImageLoader.java=UTF-8
 encoding/<project>=windows-1252

@@ -3,6 +3,7 @@ package ai;
 import model.*;
 import java.util.ArrayList;
 import java.util.Random;
+import controller.Rules;
 
 public class SimpleAI implements AI {
     private int color;
@@ -14,20 +15,55 @@ public class SimpleAI implements AI {
 
     @Override
     public int[] chooseMove(ArrayList<Pieces> pieces) {
-        ArrayList<int[]> possibleMoves = new ArrayList<>();
+        // ✅ Lấy toàn bộ nước đi hợp lệ (đã bao gồm thoát chiếu)
+        ArrayList<int[]> legalMoves = Rules.getLegalMoves(pieces, color);
 
-        for (Pieces p : pieces) {
-            if (p.color != color) continue;
-            for (int c = 0; c < 8; c++) {
-                for (int r = 0; r < 8; r++) {
-                    if (p.canMove(c, r)) {
-                        possibleMoves.add(new int[]{p.col, p.row, c, r, pieces.indexOf(p)});
-                    }
+        if (legalMoves.isEmpty()) return null; // HẾT NƯỚC → THUA
+
+        ArrayList<int[]> bestMoves = new ArrayList<>();
+
+        for (int[] move : legalMoves) {
+            ArrayList<Pieces> testBoard = Rules.cloneBoard(pieces);
+
+            int fromC = move[0];
+            int fromR = move[1];
+            int toC   = move[2];
+            int toR   = move[3];
+
+            Pieces moving = null;
+
+            // ✅ tìm quân theo tọa độ
+            for (Pieces p : testBoard) {
+                if (p.col == fromC && p.row == fromR && p.color == color) {
+                    moving = p;
+                    break;
                 }
+            }
+
+            if (moving == null) continue;
+
+            // ✅ ăn quân nếu có
+            for (int i = 0; i < testBoard.size(); i++) {
+                Pieces t = testBoard.get(i);
+                if (t.col == toC && t.row == toR && t.color != color) {
+                    testBoard.remove(i);
+                    break;
+                }
+            }
+
+            moving.col = toC;
+            moving.row = toR;
+
+            // ✅ Ưu tiên nước chiếu lại đối phương
+            if (Rules.isKingInCheck(testBoard, 1 - color)) {
+                bestMoves.add(move);
             }
         }
 
-        if (possibleMoves.isEmpty()) return null;
-        return possibleMoves.get(random.nextInt(possibleMoves.size()));
+        if (!bestMoves.isEmpty()) {
+            return bestMoves.get(random.nextInt(bestMoves.size()));
+        }
+
+        return legalMoves.get(random.nextInt(legalMoves.size()));
     }
 }
