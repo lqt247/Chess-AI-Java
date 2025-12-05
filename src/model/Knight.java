@@ -16,6 +16,14 @@ public class Knight extends Pieces {
 			image = ImageLoader.load("/accet_pieces/b-knight-pieces.png");
 		}
 	}
+    public Knight(int color, int col, int row, boolean loadImage) {
+        super(color, col, row);
+        if (!loadImage) return;
+        if (color == GamePanel.WHITE)
+            image = ImageLoader.load("/accet_pieces/w-knight-pieces.png");
+        else
+            image = ImageLoader.load("/accet_pieces/b-knight-pieces.png");
+    }
 	// NƯỚC MÀ QUÂN CÓ THỂ ĐI
 	@Override
 	public boolean canMove(int targetCol, int targetRow) {
@@ -41,14 +49,11 @@ public class Knight extends Pieces {
 
 	
 	
-	@Override
-	public Pieces copy() {
-	    Knight k = new Knight(this.color, this.col, this.row);
-	    k.hasMoved = this.hasMoved;
-	    k.preCol = this.preCol;
-	    k.preRow = this.preRow;
-	    return k;
-	}
-
+	   @Override
+	    public Pieces copy() {
+	        Knight k = new Knight(color, col, row, false);
+	        k.hasMoved = this.hasMoved;
+	        return k;
+	    }
 
 }

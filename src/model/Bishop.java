@@ -16,6 +16,15 @@ public class Bishop extends Pieces {
         }
     }
 
+    public Bishop(int color, int col, int row, boolean loadImage) {
+        super(color, col, row);
+        if (!loadImage) return;
+        if (color == GamePanel.WHITE)
+            image = ImageLoader.load("/accet_pieces/w-bishop-pieces.png");
+        else
+            image = ImageLoader.load("/accet_pieces/b-bishop-pieces.png");
+    }
+
     @Override
     public boolean canMove(int targetCol, int targetRow) {
         if (!isWithInBoard(targetCol, targetRow)) return false;
@@ -76,11 +85,8 @@ public class Bishop extends Pieces {
   
     @Override
     public Pieces copy() {
-        Bishop b = new Bishop(this.color, this.col, this.row);
-        b.hasMoved = this.hasMoved;      // trạng thái đã di chuyển
-        b.preCol = this.preCol;          // cột trước đó (dùng cho undo hoặc castle)
-        b.preRow = this.preRow;          // hàng trước đó
-        b.image = this.image;            // giữ image, không bắt buộc nhưng an toàn
+        Bishop b = new Bishop(color, col, row, false);
+        b.hasMoved = this.hasMoved;
         return b;
     }
 

@@ -19,6 +19,17 @@ public class Pawn extends Pieces {
 			image = ImageLoader.load("/accet_pieces/b-pawn-pieces.png");
 
 		}
+	}	
+	public Pawn(int color, int col, int row, boolean loadImage) {
+	    super(color, col, row);
+
+	    if (!loadImage) return; // AI clone → không load ảnh
+
+	    if (color == GamePanel.WHITE) {
+	        image = ImageLoader.load("/accet_pieces/w-pawn-pieces.png");
+	    } else {
+	        image = ImageLoader.load("/accet_pieces/b-pawn-pieces.png");
+	    }
 	}
 
 	// NƯỚC MÀ QUÂN CÓ THỂ ĐI
@@ -54,11 +65,13 @@ public class Pawn extends Pieces {
 	}
 
 	@Override
+	
 	public Pieces copy() {
-		Pawn p = new Pawn(this.color, this.col, this.row);
-		p.hasMoved = this.hasMoved;
-		return p;
+	    Pawn p = new Pawn(this.color, this.col, this.row, false); // không load ảnh
+	    p.hasMoved = this.hasMoved;
+	    return p;
 	}
+
 
 	@Override
 	public boolean canMoveSim(ArrayList<Pieces> board, int targetCol, int targetRow) {

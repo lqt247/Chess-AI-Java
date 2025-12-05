@@ -76,21 +76,23 @@ public class Rules {
         }
         if (moving == null) return false;
 
-        // Xử lý ăn quân
-        for (int i = 0; i < clone.size(); i++) {
+        // Xử lý ăn quân → dùng loop ngược để an toàn
+        for (int i = clone.size() - 1; i >= 0; i--) {
             Pieces p = clone.get(i);
             if (p.col == tc && p.row == tr) {
-                if (p instanceof King) return false;
+                if (p instanceof King) return false; // không ăn vua
                 if (p.color != color) {
-                    clone.remove(i);
+                    clone.remove(i);  // xoá an toàn
                     break;
                 }
             }
         }
 
+        // Di chuyển quân
         moving.col = tc;
         moving.row = tr;
 
+        // Kiểm tra tự chiếu
         return !isKingInCheck(clone, color);
     }
 
@@ -106,9 +108,9 @@ public class Rules {
     // CLONE BOARD CHUẨN
     // ===============================
     public static ArrayList<Pieces> cloneBoard(ArrayList<Pieces> pieces) {
-        ArrayList<Pieces> clone = new ArrayList<>();
+        ArrayList<Pieces> clone = new ArrayList<>(pieces.size());
         for (Pieces p : pieces) {
-            Pieces c = p.copy();
+            Pieces c = p.copyForAI();  // copy không load ảnh → nhẹ hơn
             c.col = p.col;
             c.row = p.row;
             c.hasMoved = p.hasMoved;
@@ -118,4 +120,5 @@ public class Rules {
         }
         return clone;
     }
+
 }

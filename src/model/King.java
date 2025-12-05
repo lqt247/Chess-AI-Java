@@ -17,6 +17,15 @@ public class King extends Pieces {
 		}
 
 	}
+
+    public King(int color, int col, int row, boolean loadImage) {
+        super(color, col, row);
+        if (!loadImage) return;
+        if (color == GamePanel.WHITE)
+            image = ImageLoader.load("/accet_pieces/w-king-pieces.png");
+        else
+            image = ImageLoader.load("/accet_pieces/b-king-pieces.png");
+    }
 	// NƯỚC MÀ QUÂN CÓ THỂ ĐI
 	
 	@Override
@@ -63,14 +72,13 @@ public class King extends Pieces {
 
 
 
-	@Override
-	public Pieces copy() {
-	    King k = new King(this.color, this.col, this.row);
-	    k.hasMoved = this.hasMoved;
-	    k.preCol = this.preCol;
-	    k.preRow = this.preRow;
-	    return k;
-	}
+    @Override
+    public Pieces copy() {
+        King k = new King(color, col, row, false);
+        k.hasMoved = this.hasMoved;
+        return k;
+    }
+
 	
 
 

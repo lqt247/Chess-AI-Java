@@ -3,8 +3,8 @@ package model;
 public class Move {
     public int fromCol, fromRow;
     public int toCol, toRow;
-    public Pieces moved;      // optional (can be null)
-    public Pieces captured;   // optional
+    public Pieces moved;      
+    public Pieces captured;   
 
     public Move(int fC, int fR, int tC, int tR) {
         this.fromCol = fC;

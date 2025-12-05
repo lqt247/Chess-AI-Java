@@ -17,6 +17,14 @@ public class Queen extends Pieces {
 			image = ImageLoader.load("/accet_pieces/b-queen-pieces.png");
 		}
 	}
+	public Queen(int color, int col, int row, boolean loadImage) {
+	    super(color, col, row);
+	    if (!loadImage) return; // AI clone → không load ảnh
+	    if (color == GamePanel.WHITE)
+	        image = ImageLoader.load("/accet_pieces/w-queen-pieces.png");
+	    else
+	        image = ImageLoader.load("/accet_pieces/b-queen-pieces.png");
+	}
 
 	// NƯỚC MÀ QUÂN CÓ THỂ ĐI
 	@Override
@@ -97,12 +105,12 @@ public class Queen extends Pieces {
 
 
 	@Override
-	public Pieces copy() {
-		Queen q = new Queen(this.color, this.col, this.row);
-		q.hasMoved = this.hasMoved;
-		q.preCol = this.preCol;
-		q.preRow = this.preRow;
-		return q;
+	public Pieces copyForAI() {
+	    Queen q = new Queen(this.color, this.col, this.row, false); // không load ảnh
+	    q.hasMoved = this.hasMoved;
+	    q.preCol = this.preCol;
+	    q.preRow = this.preRow;
+	    return q;
 	}
 
 }

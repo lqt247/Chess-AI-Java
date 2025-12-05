@@ -18,6 +18,17 @@ public class Rook extends Pieces {
 			image = ImageLoader.load("/accet_pieces/b-rook-pieces.png");
 		}
 	}
+	   // Constructor clone cho AI
+    public Rook(int color, int col, int row, boolean loadImage) {
+        super(color, col, row);
+        if (!loadImage) return;
+        if (color == GamePanel.WHITE)
+            image = ImageLoader.load("/accet_pieces/w-rook-pieces.png");
+        else
+            image = ImageLoader.load("/accet_pieces/b-rook-pieces.png");
+    }
+
+  
 	// NƯỚC MÀ QUÂN CÓ THỂ ĐI
 	@Override
 	public boolean canMove(int targetCol, int targetRow) {
@@ -68,14 +79,12 @@ public class Rook extends Pieces {
 
 
 
-	@Override
-	public Pieces copy() {
-	    Rook r = new Rook(this.color, this.col, this.row);
-	    r.hasMoved = this.hasMoved;
-	    r.preCol = this.preCol;
-	    r.preRow = this.preRow;
-	    return r;
-	}
+	  @Override
+	    public Pieces copy() {
+	        Rook r = new Rook(color, col, row, false);
+	        r.hasMoved = this.hasMoved;
+	        return r;
+	    }
 
 
 

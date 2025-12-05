@@ -181,7 +181,7 @@ public class GamePanel extends JPanel {
 	        activePiece = null;
 	        if (controller != null && controller.getControlPanel() != null) {
 	            String pieceName = p.getClass().getSimpleName();
-	            controller.getControlPanel().addMove("⚠️ " + pieceName + " đang bị chặn, không có nước đi hợp lệ!");
+	            controller.getControlPanel().addMove("⚠️ " + pieceName + " đang bị chặn, chọn quân khác để đi!");
 	        }
 	    }
 	}

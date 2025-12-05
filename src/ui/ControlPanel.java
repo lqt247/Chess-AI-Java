@@ -4,6 +4,7 @@ package ui;
 import javax.swing.*;
 
 import ai.SimpleAI;
+import ai.AlphaBetaAI;
 import ai.MinimaxAI;
 
 import java.awt.*;
@@ -54,7 +55,7 @@ public class ControlPanel extends JPanel {
 		            controller.setAI(new MinimaxAI(GamePanel.BLACK, 3));
 		            break;
 		        case "AlphaBeta":
-		            controller.setAI(null);
+		            controller.setAI(new AlphaBetaAI(GamePanel.BLACK, 5));
 		            break;
 		    }
 	

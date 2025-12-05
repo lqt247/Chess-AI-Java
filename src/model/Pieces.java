@@ -50,6 +50,20 @@ public class Pieces {
         if (this instanceof King)   return new King(color, col, row);
         return new Pieces(color, col, row);
     }
+    public Pieces copyForAI() {
+        Pieces p;
+        if (this instanceof Pawn)      p = new Pawn(color, col, row, false);
+        else if (this instanceof Rook) p = new Rook(color, col, row, false);
+        else if (this instanceof Knight) p = new Knight(color, col, row, false);
+        else if (this instanceof Bishop) p = new Bishop(color, col, row, false);
+        else if (this instanceof Queen) p = new Queen(color, col, row, false);
+        else if (this instanceof King) p = new King(color, col, row, false);
+        else p = new Pieces(color, col, row);
+
+        p.hasMoved = this.hasMoved;
+        return p;
+    }
+
 
     public int getX(int col) {
         return Board.offsetX + col * Board.SQUARE_SIZE;

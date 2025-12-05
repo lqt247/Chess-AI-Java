@@ -1,4 +1,5 @@
 eclipse.preferences.version=1
+encoding//src/ai/AlphaBetaAI.java=UTF-8
 encoding//src/ai/Heuristic.java=UTF-8
 encoding//src/ai/MinimaxAI.java=UTF-8
 encoding//src/ai/SimpleAI.java=UTF-8
