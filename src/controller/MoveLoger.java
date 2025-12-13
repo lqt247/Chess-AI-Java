@@ -7,22 +7,28 @@ import java.util.List;
 
 
 public class MoveLoger {
-	 private final List<String> moves;
+    private final List<String> moves;
 
-	    public MoveLoger() {
-	        moves = new ArrayList<>();
-	    }
+    public MoveLoger() {
+        moves = new ArrayList<>();
+    }
 
-	    public void addMove(String move) {
-	        moves.add(move);
-	    }
+    public void addMove(String move) {
+        moves.add(move);
+    }
 
-	    public List<String> getMoves() {
-	        return moves;
-	    }
+    // MỞ RỘNG THÊM: " AI ĐANG SUY NGHĨ"
+    public void removeLast() {
+        if (!moves.isEmpty())
+            moves.remove(moves.size() - 1);
+    }
 
-	    public void clear() {
-	        moves.clear();
-	    }
-	}
+    public List<String> getMoves() {
+        return moves;
+    }
+
+    public void clear() {
+        moves.clear();
+    }
+}
 

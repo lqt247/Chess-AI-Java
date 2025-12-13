@@ -20,13 +20,19 @@ public class GamePanel extends JPanel {
 	MouseHandler mouse = new MouseHandler();
 	public static ArrayList<Pieces> pieces = new ArrayList<>();
 	public static Pieces[][] boardMap = new Pieces[8][8];
+	
+	// LÀM UI
 
 	Pieces activePiece;
 	ArrayList<int[]> validSquares = new ArrayList<>();
 
 	public static final int WHITE = 1;
 	public static final int BLACK = 0;
-
+	
+	// highlight nước đi cuối
+	private int lastFromCol = -1, lastFromRow = -1;
+	private int lastToCol = -1, lastToRow = -1;
+	
 	public GamePanel() {
 		setPreferredSize(new Dimension(MAX_WIDTH, MAX_HEIGHT));
 		setBackground(new Color(0x2E, 0x66, 0x33));
@@ -194,10 +200,10 @@ public class GamePanel extends JPanel {
 	private void movePiece(Pieces piece, int toCol, int toRow) {
 	    if (piece == null) return;
 
-	    // ✅ 1. KIỂM TRA TỰ CHIẾU TRƯỚC KHI ĐI (CỰC KỲ QUAN TRỌNG)
+	    //  KIỂM TRA TỰ CHIẾU TRƯỚC KHI ĐI (CỰC KỲ QUAN TRỌNG)
 	    int[] moveCheck = new int[]{ piece.col, piece.row, toCol, toRow };
 	    if (!Rules.isLegalAfterMove(pieces, moveCheck, piece.color)) {
-	        // ❌ nước đi làm vua tự chiếu -> huỷ
+	      
 	        return;
 	    }
 
@@ -219,7 +225,7 @@ public class GamePanel extends JPanel {
 	    if (target != null)
 	        pieces.remove(target);
 
-	    // ✅ Phong hậu
+	    // Phong hậu
 	    if (piece instanceof Pawn) {
 	        if ((piece.color == WHITE && toRow == 0) || (piece.color == BLACK && toRow == 7)) {
 	            Pieces newQueen = new Queen(piece.color, toCol, toRow);
@@ -231,12 +237,13 @@ public class GamePanel extends JPanel {
 	        }
 	    }
 
-	    // ✅ Nhập thành
+	    //  Nhập thành
 	    if (piece instanceof King && Math.abs(oldCol - toCol) == 2) {
 	        castleRook(piece, oldCol, toRow);
 	    }
-
-	    // ✅ Báo cho controller
+	    // 2LIGHT NC ĐI AI
+	    setLastMove(oldCol, oldRow, toCol, toRow);
+	    // Báo cho controller
 	    if (controller != null) {
 	        controller.onMove(piece, oldCol, oldRow, toCol, toRow, target);
 	    }
@@ -289,9 +296,12 @@ public class GamePanel extends JPanel {
 		Graphics2D g2 = (Graphics2D) g;
 
 		board.draw(g2);
-
+		
+		
+		drawCoordinates(g2);
+		  
 		g2.setColor(new Color(50, 205, 50, 180));
-		g2.setStroke(new BasicStroke(8));
+		g2.setStroke(new BasicStroke(6));
 		for (int[] sq : validSquares) {
 			int x = Board.offsetX + sq[0] * Board.SQUARE_SIZE;
 			int y = Board.offsetY + sq[1] * Board.SQUARE_SIZE;
@@ -299,29 +309,92 @@ public class GamePanel extends JPanel {
 		}
 
 		if (activePiece != null) {
-			g2.setColor(new Color(200, 0, 0, 120));
-			g2.fillRect(Board.offsetX + activePiece.col * Board.SQUARE_SIZE,
-					Board.offsetY + activePiece.row * Board.SQUARE_SIZE, Board.SQUARE_SIZE, Board.SQUARE_SIZE);
+		    g2.setColor(new Color(30, 144, 255, 200)); // xanh dương
+		    g2.setStroke(new BasicStroke(6));
+		    g2.drawRect(
+		        Board.offsetX + activePiece.col * Board.SQUARE_SIZE,
+		        Board.offsetY + activePiece.row * Board.SQUARE_SIZE,
+		        Board.SQUARE_SIZE,
+		        Board.SQUARE_SIZE
+		    );
+		}
+
+		
+		// highlight nước đi cuối
+		if (lastFromCol != -1) {
+
+		  
+		    g2.setStroke(new BasicStroke(6)); // độ dày viền
+
+		    int fx = Board.offsetX + lastFromCol * Board.SQUARE_SIZE;
+		    int fy = Board.offsetY + lastFromRow * Board.SQUARE_SIZE;
+		    int tx = Board.offsetX + lastToCol * Board.SQUARE_SIZE;
+		    int ty = Board.offsetY + lastToRow * Board.SQUARE_SIZE;
+
+		    // FROM – viền xanh dương
+		    g2.setColor(new Color(30, 144, 255)); // DodgerBlue
+		    g2.drawRect(fx, fy, Board.SQUARE_SIZE, Board.SQUARE_SIZE);
+
+		    // TO – viền xanh lá
+		    g2.setColor(new Color(50, 205, 50)); // LimeGreen
+		    g2.drawRect(tx, ty, Board.SQUARE_SIZE, Board.SQUARE_SIZE);
 		}
 
 		for (Pieces p : pieces)
 			p.draw(g2);
 	}
-
+	// DÙNG ĐỂ HIGHLIGHT NC ĐI CỦA AI
+	public void setLastMove(int fromCol, int fromRow, int toCol, int toRow) {
+	    this.lastFromCol = fromCol;
+	    this.lastFromRow = fromRow;
+	    this.lastToCol = toCol;
+	    this.lastToRow = toRow;
+	    repaint();
+	}
+	// XÓA HIGHTLIHGT KHI : GAME MỚI
+	public void clearLastMoveHighlight() {
+	    lastFromCol = -1;
+	    lastFromRow = -1;
+	    lastToCol = -1;
+	    lastToRow = -1;
+	}
+	
 	public void setController(GameController controller) {
 		this.controller = controller;
 	}
+	private void drawCoordinates(Graphics2D g2) {
+		  // Font to & rõ
+	    g2.setFont(new Font("Segoe UI", Font.BOLD, 18));
 
-	public void applyAIMove(int[] move) {
-		if (move == null || move.length < 4)
-			return;
+	   // MÀU
+	    g2.setColor(new Color(60, 179, 113)); 
 
-		int fromCol = move[0], fromRow = move[1], toCol = move[2], toRow = move[3];
-		Pieces moving = getPieceAt(fromCol, fromRow);
 
-		if (moving != null) {
-			// apply through movePiece which will validate and call controller.onMove
-			movePiece(moving, toCol, toRow);
-		}
+
+	    // a–h (dưới)
+	    for (int col = 0; col < 8; col++) {
+	        char file = (char) ('a' + col);
+	        int x = Board.offsetX + col * Board.SQUARE_SIZE + Board.SQUARE_SIZE / 2 - 4;
+	        int y = Board.offsetY + 8 * Board.SQUARE_SIZE + 18;
+	        g2.drawString(String.valueOf(file), x, y);
+	    }
+
+	    // 8–1 (bên trái)
+	    for (int row = 0; row < 8; row++) {
+	        int rank = 8 - row;
+	        int x = Board.offsetX - 18;
+	        int y = Board.offsetY + row * Board.SQUARE_SIZE + Board.SQUARE_SIZE / 2 + 5;
+	        g2.drawString(String.valueOf(rank), x, y);
+	    }
 	}
+
+	public void applyAIMove(int[] mv) {
+	    Pieces piece = getPieceAt(mv[0], mv[1]);
+	    if (piece == null) return;
+
+
+	    movePiece(piece, mv[2], mv[3]); // cập nhật bàn cờ
+
+	}
+	
 }

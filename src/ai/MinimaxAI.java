@@ -1,6 +1,8 @@
 package ai;
 
 import java.util.ArrayList;
+import java.util.List;
+
 import model.*;
 import controller.Rules;
 
@@ -8,6 +10,7 @@ public class MinimaxAI implements AI {
 
     private int aiColor;
     private int maxDepth;
+    private List<String> history;
 
     public MinimaxAI(int aiColor, int depth) {
         this.aiColor = aiColor;
@@ -15,83 +18,113 @@ public class MinimaxAI implements AI {
     }
 
     @Override
-    public int[] chooseMove(ArrayList<Pieces> board) {
-        MoveScore best = minimax(board, maxDepth, aiColor, true, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        return best.move;
+    public int[] chooseMove(ArrayList<Pieces> board, List<String> history) {
+        this.history = history; // lưu history để phạt lặp
+        ArrayList<Pieces> clone = cloneBoard(board);
+        MoveScore best = minimax(clone, maxDepth, aiColor, true);
+        return best != null ? best.move : null;
     }
 
-    private MoveScore minimax(ArrayList<Pieces> board, int depth, int turnColor, boolean isMaximizing, int alpha, int beta) {
-        ArrayList<int[]> legalMoves = Rules.getLegalMoves(board, turnColor);
+    private MoveScore minimax(ArrayList<Pieces> board, int depth, int turnColor, boolean isMax) {
 
-        if (depth == 0 || legalMoves.isEmpty()) {
-            int score = Heuristic.evaluate(board, aiColor);
-            return new MoveScore(null, score);
+        ArrayList<int[]> moves = Rules.getLegalMoves(board, turnColor);
+
+        if (depth == 0 || moves.isEmpty()) {
+            int val = Heuristic.evaluate(board, aiColor);
+            return new MoveScore(null, val);
         }
-
-        // Move ordering: ưu tiên ăn quân
-        legalMoves.sort((a, b) -> {
-            Pieces targetA = getPieceAt(board, a[2], a[3]);
-            Pieces targetB = getPieceAt(board, b[2], b[3]);
-            int valA = targetA != null ? Heuristic.getPieceValue(targetA) : 0;
-            int valB = targetB != null ? Heuristic.getPieceValue(targetB) : 0;
-            return Integer.compare(valB, valA);
-        });
 
         MoveScore best = null;
 
-        for (int[] move : legalMoves) {
-            Pieces moving = getPieceAt(board, move[0], move[1]);
-            if (moving == null) continue;
+        for (int[] move : moves) {
 
-            // Lưu lại thông tin undo
-            int fromCol = moving.col, fromRow = moving.row;
-            Pieces captured = getPieceAt(board, move[2], move[3]);
+            ArrayList<Pieces> nextBoard = cloneBoard(board);
+            applyMove(nextBoard, move);
 
-            // Thực hiện move
-            moving.col = move[2];
-            moving.row = move[3];
-            if (captured != null) board.remove(captured);
-
-            // Đệ quy
             int nextTurn = (turnColor == 1) ? 0 : 1;
-            MoveScore result = minimax(board, depth - 1, nextTurn, !isMaximizing, alpha, beta);
+            MoveScore child = minimax(nextBoard, depth - 1, nextTurn, !isMax);
 
-            // Undo move
-            moving.col = fromCol;
-            moving.row = fromRow;
-            if (captured != null) board.add(captured);
+            // PHẠT LẶP NƯỚC 
+            Pieces p = getPieceAt(board, move[0], move[1]);
+            String moveStr = encodeMove(p, move);
 
-            // Cập nhật best
-            if (best == null) best = new MoveScore(move, result.score);
-            else {
-                if (isMaximizing && result.score > best.score) best = new MoveScore(move, result.score);
-                if (!isMaximizing && result.score < best.score) best = new MoveScore(move, result.score);
+            int penalty = 0;
+            if (isRepeatMove(history, moveStr)) {
+                penalty = 5000;
             }
 
-            // Alpha-Beta pruning
-            if (isMaximizing) {
-                alpha = Math.max(alpha, best.score);
-                if (beta <= alpha) break;
+            int finalScore = child.score - penalty;
+            // ----------------------------------------------------------------------
+
+            if (best == null) {
+                best = new MoveScore(move, finalScore);
             } else {
-                beta = Math.min(beta, best.score);
-                if (beta <= alpha) break;
+                if (isMax && finalScore > best.score) {
+                    best = new MoveScore(move, finalScore);
+                }
+                if (!isMax && finalScore < best.score) {
+                    best = new MoveScore(move, finalScore);
+                }
             }
         }
 
-        if (best == null) return new MoveScore(null, Heuristic.evaluate(board, aiColor));
         return best;
     }
 
+    // CÁC HÀM PHỤ 
+
+    private boolean isRepeatMove(List<String> history, String move) {
+        if (history == null) return false;
+        int n = history.size();
+        if (n < 2) return false;
+        return move.equals(history.get(n - 2));
+    }
+
+    private String encodeMove(Pieces p, int[] mv) {
+        if (p == null) return "";
+        String colorName = (p.color == 1) ? "Trắng" : "Đen";
+        String pieceName = p.getClass().getSimpleName();
+        return pieceName + " (" + colorName + "): "
+             + toChess(mv[0], mv[1]) + " -> " + toChess(mv[2], mv[3]);
+    }
+
+    private String toChess(int c, int r) {
+        return "" + (char)('a' + c) + (8 - r);
+    }
+
+    private void applyMove(ArrayList<Pieces> board, int[] mv) {
+        Pieces p = getPieceAt(board, mv[0], mv[1]);
+        if (p == null) return;
+
+        Pieces captured = getPieceAt(board, mv[2], mv[3]);
+
+        p.col = mv[2];
+        p.row = mv[3];
+
+        if (captured != null)
+            board.remove(captured);
+    }
+
     private Pieces getPieceAt(ArrayList<Pieces> board, int col, int row) {
-        for (Pieces p : board) {
-            if (p.col == col && p.row == row) return p;
-        }
+        for (Pieces p : board)
+            if (p.col == col && p.row == row)
+                return p;
         return null;
+    }
+
+    private ArrayList<Pieces> cloneBoard(ArrayList<Pieces> board) {
+        ArrayList<Pieces> clone = new ArrayList<>();
+        for (Pieces p : board)
+            clone.add(p.copyForAI());
+        return clone;
     }
 
     private static class MoveScore {
         int[] move;
         int score;
-        MoveScore(int[] m, int s) { move = m; score = s; }
+        MoveScore(int[] m, int s) {
+            move = m;
+            score = s;
+        }
     }
 }

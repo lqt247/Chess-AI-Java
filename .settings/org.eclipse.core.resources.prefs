@@ -4,6 +4,7 @@ encoding//src/ai/Heuristic.java=UTF-8
 encoding//src/ai/MinimaxAI.java=UTF-8
 encoding//src/ai/SimpleAI.java=UTF-8
 encoding//src/controller/GameController.java=UTF-8
+encoding//src/controller/MoveLoger.java=UTF-8
 encoding//src/controller/Rules.java=UTF-8
 encoding//src/main/GameFrame.java=UTF-8
 encoding//src/main/Main.java=UTF-8

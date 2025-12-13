@@ -14,6 +14,7 @@ public class Pieces {
     public int x, y;
     public boolean hasMoved = false;
 
+
     public Pieces(int color, int col, int row) {
         this.color = color;
         this.col = col;

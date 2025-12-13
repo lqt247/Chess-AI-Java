@@ -5,13 +5,11 @@ import ui.ControlPanel;
 import model.Pieces;
 import ai.AI;
 
+import java.util.List;
+
 import java.util.ArrayList;
 
-/**
- * GameController (full, đã sửa) - Chịu trách nhiệm ghi log, đổi lượt, gọi AI
- * (trên thread riêng) - setAI(AI) để ControlPanel có thể gán SimpleAI /
- * MinimaxAI / AlphaBeta
- */
+
 public class GameController {
 	private GamePanel gamePanel;
 	private ControlPanel controlPanel;
@@ -19,6 +17,8 @@ public class GameController {
 	private String winner;
 	private MoveLoger moveLogger;
 	private boolean lastMovePutKingInCheck = false;
+	// LỊCH SỬ - DANH SÁCH
+	private ArrayList<String> history = new ArrayList<>();
 
 	private AI ai; // AI tổng quát (SimpleAI / MinimaxAI)
 	private volatile boolean aiThinking = false; // tránh gọi AI liên tục
@@ -32,7 +32,7 @@ public class GameController {
 		this.moveLogger = new MoveLoger();
 	}
 
-	// ===== GETTER / SETTER =====
+	//  GETTER / SETTER 
 	public int getCurrentPlayer() {
 		return currentPlayer;
 	}
@@ -62,12 +62,18 @@ public class GameController {
 		return controlPanel;
 	}
 
-	// ===== XỬ LÝ NƯỚC ĐI =====
+	// XỬ LÝ NƯỚC ĐI 
 	public void onMove(Pieces piece, int oldCol, int oldRow, int newCol, int newRow, Pieces target) {
 		if (winner != null)
 			return; // game đã kết thúc
 
-		String colorName = (piece.color == GamePanel.WHITE) ? "Trắng" : "Đen";
+		String colorName;
+		if (piece.color == GamePanel.WHITE) {
+		    colorName = " BẠN ";
+		} else {
+		    colorName = (ai != null) ? " AI " : "Đen";
+		}
+
 		String pieceName = piece.getClass().getSimpleName();
 
 		String move = pieceName + " (" + colorName + "): " + toChessNotation(oldCol, oldRow) + " -> "
@@ -79,58 +85,99 @@ public class GameController {
 		if (controlPanel != null)
 			controlPanel.addMove(move);
 
-		// ===== KIỂM TRA CHECK / CHECKMATE TRƯỚC KHI ĐỔI LƯỢT =====
+		// CHECK LẶP 3 nước
+		if (detectRepetition()) {
+			winner = "Hòa";
+			currentPlayer = -1;
+			if (controlPanel != null)
+				controlPanel.addMove("=== HÒA (Lặp 3 lần) ===");
+			return;
+		}
+
+		//  KIỂM TRA CHECK / CHECKMATE TRƯỚC KHI ĐỔI LƯỢT 
 		checkCheckAndCheckmate(piece);
 
 		// Nếu game kết thúc → không đổi lượt, không gọi AI
 		if (winner != null)
 			return;
-		
 
-		// ===== ĐỔI LƯỢT =====
+		//  ĐỔI LƯỢT 
 		currentPlayer = (piece.color == GamePanel.WHITE) ? GamePanel.BLACK : GamePanel.WHITE;
 
-		// ===== GỌI AI =====
+		//  GỌI AI
 		callAIIfNeeded();
 
 	}
 
-	// ===== GỌI AI (thread riêng, an toàn) =====
+	//GỌI AI (thread riêng, an toàn)
 	private void callAIIfNeeded() {
-		if (ai == null || winner != null)
-			return;
-		if (currentPlayer != GamePanel.BLACK)
-			return; // giả sử AI luôn chơi ĐEN
-		if (aiThinking)
-			return;
 
-		aiThinking = true;
+	    //  ĐIỀU KIỆN CHẶN 
+	    if (ai == null) return;
+	    if (winner != null) return;
+	    if (currentPlayer != GamePanel.BLACK) return; // AI chơi ĐEN
+	    if (aiThinking) return;
 
-		new Thread(() -> {
-			try {
-				Thread.sleep(300); // delay nhỏ cho cảm giác AI suy nghĩ
+	    aiThinking = true;
 
-				if (winner != null)
-					return; // game kết thúc → AI không đi
+	    // HIỆN "AI ĐANG SUY NGHĨ"
+	    if (controlPanel != null) {
+	        javax.swing.SwingUtilities.invokeLater(() -> {
+	        
+	        	
+	        	controlPanel.addMove("------------------------------------------------------");
+	        	controlPanel.addMove("          🤖 AI ĐANG SUY NGHĨ...");
+	        	controlPanel.addMove("------------------------------------------------------");
 
-				int[] move = ai.chooseMove(GamePanel.pieces);
+;
+	        });
+	    }
 
-				if (move != null && winner == null) {
-					javax.swing.SwingUtilities.invokeLater(() -> {
-						if (gamePanel != null) {
-							gamePanel.applyAIMove(move);
-						}
-					});
-				}
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			} finally {
-				aiThinking = false;
-			}
-		}).start();
+	    //  THREAD RIÊNG CHO AI
+	    new Thread(() -> {
+
+	        int[] aiMove = null;
+
+	        try {
+	            Thread.sleep(300); // delay cho cảm giác AI suy nghĩ
+
+	            if (winner != null) return;
+
+	            // AI TÍNH TOÁN 
+	            aiMove = ai.chooseMove(GamePanel.pieces, moveLogger.getMoves());
+
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+
+	        final int[] finalMove = aiMove;
+
+	        // QUAY LẠI EDT
+	        javax.swing.SwingUtilities.invokeLater(() -> {
+	            try {
+	                // 1-XOÁ DÒNG "AI ĐANG SUY NGHĨ..."
+	                if (controlPanel != null) {
+	                	controlPanel.removeLastMove();
+	                	controlPanel.removeLastMove();
+	                	controlPanel.removeLastMove();
+
+	                }
+
+	                // 2-CHO AI ĐI (sẽ tự log trong onMove)
+	                if (finalMove != null && winner == null && gamePanel != null) {
+	                    gamePanel.applyAIMove(finalMove);
+	                }
+
+	            } finally {
+	                aiThinking = false;
+	            }
+	        });
+
+	    }).start();
 	}
 
-	// ===== KIỂM TRA CHECK / CHECKMATE =====
+
+	// KIỂM TRA CHECK / CHECKMATE 
 	private void checkCheckAndCheckmate(Pieces movedPiece) {
 		if (winner != null)
 			return;
@@ -151,28 +198,51 @@ public class GameController {
 		// Kiểm tra tất cả nước đi hợp lệ của đối phương
 		ArrayList<int[]> legal = Rules.getLegalMoves(GamePanel.pieces, enemyColor);
 
-
 		if (legal.isEmpty()) {
 			if (inCheck) {
 				// Vua đang bị chiếu + không còn nước → Checkmate
 				winner = (enemyColor == GamePanel.WHITE) ? "Trắng" : "Đen";
 				if (controlPanel != null)
-					controlPanel.addMove("=== " + winner + " CHIẾN THẮNG (Checkmate) ===");
+					controlPanel.addMove("=== " + winner + " THUA (Chiếu bí) ===");
 			} else {
 				// Không bị chiếu nhưng không còn nước → Stalemate (hòa)
 				winner = "Hòa";
 				if (controlPanel != null)
-					controlPanel.addMove("=== HÒA (Stalemate) ===");
+					controlPanel.addMove("=== HÒA ===");
 			}
 			currentPlayer = -1; // game kết thúc
 		}
 	}
 
-	// ===== NEW GAME =====
+	//
+	private String encodeBoard(ArrayList<Pieces> board, int turnColor) {
+		StringBuilder sb = new StringBuilder();
+		for (Pieces p : board) {
+			sb.append(p.getClass().getSimpleName()).append(p.color).append(p.col).append(p.row).append(";");
+		}
+		sb.append("T").append(turnColor);
+		return sb.toString();
+	}
+	private String encodeMove(Pieces p, int[] mv) {
+	    String colorName = (p.color == 1) ? "Trắng" : "Đen";
+	    String pieceName = p.getClass().getSimpleName();
+	    return pieceName + " (" + colorName + "): "
+	         + toChess(mv[0], mv[1]) + " -> " + toChess(mv[2], mv[3]);
+	}
+
+	private String toChess(int c, int r) {
+	    return "" + (char)('a' + c) + (8 - r);
+	}
+
+	// NEW GAME: GAME MỚI
 	public void newGame() {
 		if (gamePanel != null)
 			gamePanel.resetBoard();
+		// XÓA 2LIGHT
+		gamePanel.clearLastMoveHighlight();
+		// XÓA LOG
 		moveLogger.clear();
+		// SET NGƯỜI CHƠI NÀ
 		currentPlayer = GamePanel.WHITE;
 		winner = null;
 		aiThinking = false;
@@ -181,10 +251,43 @@ public class GameController {
 			controlPanel.addMove("___________GAME MỚI___________");
 	}
 
-	// ===== HỖ TRỢ CHUYỂN TOẠ DO CHESS NOTATION =====
+	// HỖ TRỢ CHUYỂN TOẠ DO CHESS NOTATION
 	private String toChessNotation(int col, int row) {
 		char file = (char) ('a' + col);
 		int rank = 8 - row;
 		return "" + file + rank;
 	}
+	// Hàm này dùng để check 2 nước đi lặp ( dạy cho AI biết nen trách lặp -> không là xử HÒA )
+	public boolean isRepeatMove(String move) {
+	    List<String> list = moveLogger.getMoves();
+	    int n = list.size();
+	    if (n < 4) return false;
+
+	    // so với 2 lần trước
+	    return move.equals(list.get(n - 2));
+	}
+
+	// Hàm này dùng để check nếu quá 3 bước lập thì sẽ trả về HÒA nha
+	private boolean detectRepetition() {
+		// moveLoger
+		List<String> list = moveLogger.getMoves();
+		if (list.size() < 6)
+			return false;
+
+		int n = list.size();
+
+		// Lấy 3 cặp nước cuối
+		String a1 = list.get(n - 6);
+		String a2 = list.get(n - 5);
+
+		String b1 = list.get(n - 4);
+		String b2 = list.get(n - 3);
+
+		String c1 = list.get(n - 2);
+		String c2 = list.get(n - 1);
+
+		// So sánh xem 3 lần có giống nhau không
+		return a1.equals(b1) && a1.equals(c1) && a2.equals(b2) && a2.equals(c2);
+	}
+
 }

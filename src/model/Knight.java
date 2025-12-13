@@ -11,18 +11,18 @@ public class Knight extends Pieces {
 		super(color, col, row);
 
 		if (color == GamePanel.WHITE) {
-			image = ImageLoader.load("/accet_pieces/w-knight-pieces.png");
+			image = ImageLoader.load("/asset_pieces/w-knight-pieces.png");
 		} else {
-			image = ImageLoader.load("/accet_pieces/b-knight-pieces.png");
+			image = ImageLoader.load("/asset_pieces/b-knight-pieces.png");
 		}
 	}
     public Knight(int color, int col, int row, boolean loadImage) {
         super(color, col, row);
         if (!loadImage) return;
         if (color == GamePanel.WHITE)
-            image = ImageLoader.load("/accet_pieces/w-knight-pieces.png");
+            image = ImageLoader.load("/asset_pieces/w-knight-pieces.png");
         else
-            image = ImageLoader.load("/accet_pieces/b-knight-pieces.png");
+            image = ImageLoader.load("/asset_pieces/b-knight-pieces.png");
     }
 	// NƯỚC MÀ QUÂN CÓ THỂ ĐI
 	@Override

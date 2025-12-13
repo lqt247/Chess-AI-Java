@@ -10,9 +10,9 @@ public class King extends Pieces {
 	public King(int color, int col, int row) {
 		super(color, col, row);
 		if (color == GamePanel.WHITE) {
-			image = ImageLoader.load("/accet_pieces/w-king-pieces.png");
+			image = ImageLoader.load("/asset_pieces/w-king-pieces.png");
 		} else {
-			image = ImageLoader.load("/accet_pieces/b-king-pieces.png");
+			image = ImageLoader.load("/asset_pieces/b-king-pieces.png");
 
 		}
 
@@ -22,9 +22,9 @@ public class King extends Pieces {
         super(color, col, row);
         if (!loadImage) return;
         if (color == GamePanel.WHITE)
-            image = ImageLoader.load("/accet_pieces/w-king-pieces.png");
+            image = ImageLoader.load("/asset_pieces/w-king-pieces.png");
         else
-            image = ImageLoader.load("/accet_pieces/b-king-pieces.png");
+            image = ImageLoader.load("/asset_pieces/b-king-pieces.png");
     }
 	// NƯỚC MÀ QUÂN CÓ THỂ ĐI
 	

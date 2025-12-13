@@ -12,18 +12,18 @@ public class Queen extends Pieces {
 		if (color == GamePanel.WHITE)
 
 		{
-			image = ImageLoader.load("/accet_pieces/w-queen-pieces.png");
+			image = ImageLoader.load("/asset_pieces/w-queen-pieces.png");
 		} else {
-			image = ImageLoader.load("/accet_pieces/b-queen-pieces.png");
+			image = ImageLoader.load("/asset_pieces/b-queen-pieces.png");
 		}
 	}
 	public Queen(int color, int col, int row, boolean loadImage) {
 	    super(color, col, row);
 	    if (!loadImage) return; // AI clone → không load ảnh
 	    if (color == GamePanel.WHITE)
-	        image = ImageLoader.load("/accet_pieces/w-queen-pieces.png");
+	        image = ImageLoader.load("/asset_pieces/w-queen-pieces.png");
 	    else
-	        image = ImageLoader.load("/accet_pieces/b-queen-pieces.png");
+	        image = ImageLoader.load("/asset_pieces/b-queen-pieces.png");
 	}
 
 	// NƯỚC MÀ QUÂN CÓ THỂ ĐI

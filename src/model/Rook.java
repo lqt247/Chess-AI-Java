@@ -13,9 +13,9 @@ public class Rook extends Pieces {
 		if (color == GamePanel.WHITE)
 
 		{
-			image = ImageLoader.load("/accet_pieces/w-rook-pieces.png");
+			image = ImageLoader.load("/asset_pieces/w-rook-pieces.png");
 		} else {
-			image = ImageLoader.load("/accet_pieces/b-rook-pieces.png");
+			image = ImageLoader.load("/asset_pieces/b-rook-pieces.png");
 		}
 	}
 	   // Constructor clone cho AI
@@ -23,9 +23,9 @@ public class Rook extends Pieces {
         super(color, col, row);
         if (!loadImage) return;
         if (color == GamePanel.WHITE)
-            image = ImageLoader.load("/accet_pieces/w-rook-pieces.png");
+            image = ImageLoader.load("/asset_pieces/w-rook-pieces.png");
         else
-            image = ImageLoader.load("/accet_pieces/b-rook-pieces.png");
+            image = ImageLoader.load("/asset_pieces/b-rook-pieces.png");
     }
 
   

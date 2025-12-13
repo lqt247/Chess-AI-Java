@@ -13,10 +13,10 @@ public class Pawn extends Pieces {
 		super(color, col, row);
 
 		if (color == GamePanel.WHITE) {
-			image = ImageLoader.load("/accet_pieces/w-pawn-pieces.png");
+			image = ImageLoader.load("/asset_pieces/w-pawn-pieces.png");
 
 		} else {
-			image = ImageLoader.load("/accet_pieces/b-pawn-pieces.png");
+			image = ImageLoader.load("/asset_pieces/b-pawn-pieces.png");
 
 		}
 	}	
@@ -26,9 +26,9 @@ public class Pawn extends Pieces {
 	    if (!loadImage) return; // AI clone → không load ảnh
 
 	    if (color == GamePanel.WHITE) {
-	        image = ImageLoader.load("/accet_pieces/w-pawn-pieces.png");
+	        image = ImageLoader.load("/asset_pieces/w-pawn-pieces.png");
 	    } else {
-	        image = ImageLoader.load("/accet_pieces/b-pawn-pieces.png");
+	        image = ImageLoader.load("/asset_pieces/b-pawn-pieces.png");
 	    }
 	}
 

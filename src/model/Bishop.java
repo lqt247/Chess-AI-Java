@@ -10,9 +10,9 @@ public class Bishop extends Pieces {
     public Bishop(int color, int col, int row) {
         super(color, col, row);
         if (color == GamePanel.WHITE) {
-            image = ImageLoader.load("/accet_pieces/w-bishop-pieces.png");
+            image = ImageLoader.load("/asset_pieces/w-bishop-pieces.png");
         } else {
-            image = ImageLoader.load("/accet_pieces/b-bishop-pieces.png");
+            image = ImageLoader.load("/asset_pieces/b-bishop-pieces.png");
         }
     }
 
@@ -20,9 +20,9 @@ public class Bishop extends Pieces {
         super(color, col, row);
         if (!loadImage) return;
         if (color == GamePanel.WHITE)
-            image = ImageLoader.load("/accet_pieces/w-bishop-pieces.png");
+            image = ImageLoader.load("/asset_pieces/w-bishop-pieces.png");
         else
-            image = ImageLoader.load("/accet_pieces/b-bishop-pieces.png");
+            image = ImageLoader.load("/asset_pieces/b-bishop-pieces.png");
     }
 
     @Override

@@ -2,6 +2,7 @@ package ai;
 
 import model.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import controller.Rules;
 
@@ -12,10 +13,11 @@ public class SimpleAI implements AI {
     public SimpleAI(int color) {
         this.color = color;
     }
+    private java.util.HashMap<Long, Integer> repetitionMap = new java.util.HashMap<>();
 
     @Override
-    public int[] chooseMove(ArrayList<Pieces> pieces) {
-        // ✅ Lấy toàn bộ nước đi hợp lệ (đã bao gồm thoát chiếu)
+    public int[] chooseMove(ArrayList<Pieces> pieces, List<String> history) {
+        // Lấy toàn bộ nước đi hợp lệ (đã bao gồm thoát chiếu)
         ArrayList<int[]> legalMoves = Rules.getLegalMoves(pieces, color);
 
         if (legalMoves.isEmpty()) return null; // HẾT NƯỚC → THUA
@@ -32,7 +34,7 @@ public class SimpleAI implements AI {
 
             Pieces moving = null;
 
-            // ✅ tìm quân theo tọa độ
+            // tìm quân theo tọa độ
             for (Pieces p : testBoard) {
                 if (p.col == fromC && p.row == fromR && p.color == color) {
                     moving = p;
@@ -42,7 +44,7 @@ public class SimpleAI implements AI {
 
             if (moving == null) continue;
 
-            // ✅ ăn quân nếu có
+            //  ăn quân nếu có
             for (int i = 0; i < testBoard.size(); i++) {
                 Pieces t = testBoard.get(i);
                 if (t.col == toC && t.row == toR && t.color != color) {
@@ -54,7 +56,7 @@ public class SimpleAI implements AI {
             moving.col = toC;
             moving.row = toR;
 
-            // ✅ Ưu tiên nước chiếu lại đối phương
+            //  Ưu tiên nước chiếu lại đối phương
             if (Rules.isKingInCheck(testBoard, 1 - color)) {
                 bestMoves.add(move);
             }

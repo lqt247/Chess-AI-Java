@@ -5,9 +5,9 @@ import model.*;
 
 public class Rules {
 
-    // ===============================
+ 
     // TÌM KING
-    // ===============================
+   
     public static Pieces findKing(ArrayList<Pieces> pieces, int color) {
         for (Pieces p : pieces) {
             if (p instanceof King && p.color == color)
@@ -16,9 +16,8 @@ public class Rules {
         return null;
     }
 
-    // ===============================
     // KIỂM TRA CHIẾU
-    // ===============================
+  
     public static boolean isKingInCheck(ArrayList<Pieces> board, int color) {
         Pieces king = findKing(board, color);
         if (king == null) return false;
@@ -31,9 +30,9 @@ public class Rules {
         return false;
     }
 
-    // ===============================
+ 
     // LẤY TOÀN BỘ NƯỚC HỢP LỆ
-    // ===============================
+  
     public static ArrayList<int[]> getLegalMoves(ArrayList<Pieces> board, int color) {
         ArrayList<int[]> legal = new ArrayList<>();
 
@@ -58,9 +57,9 @@ public class Rules {
         return legal;
     }
 
-    // ===============================
+
     // GIẢ LẬP NƯỚC ĐI → KIỂM TRA TỰ CHIẾU
-    // ===============================
+  
     public static boolean isLegalAfterMove(ArrayList<Pieces> board, int[] move, int color) {
         int fc = move[0], fr = move[1];
         int tc = move[2], tr = move[3];
@@ -96,17 +95,16 @@ public class Rules {
         return !isKingInCheck(clone, color);
     }
 
-    // ===============================
     // CHECKMATE
-    // ===============================
+
     public static boolean isCheckmate(ArrayList<Pieces> pieces, int color) {
         if (!isKingInCheck(pieces, color)) return false;
         return getLegalMoves(pieces, color).isEmpty();
     }
 
-    // ===============================
+
     // CLONE BOARD CHUẨN
-    // ===============================
+
     public static ArrayList<Pieces> cloneBoard(ArrayList<Pieces> pieces) {
         ArrayList<Pieces> clone = new ArrayList<>(pieces.size());
         for (Pieces p : pieces) {
