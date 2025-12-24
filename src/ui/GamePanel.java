@@ -331,13 +331,17 @@ public class GamePanel extends JPanel {
 		    int tx = Board.offsetX + lastToCol * Board.SQUARE_SIZE;
 		    int ty = Board.offsetY + lastToRow * Board.SQUARE_SIZE;
 
-		    // FROM – viền xanh dương
-		    g2.setColor(new Color(30, 144, 255)); // DodgerBlue
+		    // from
+		    g2.setColor(new Color(240, 220, 130));
+		   
 		    g2.drawRect(fx, fy, Board.SQUARE_SIZE, Board.SQUARE_SIZE);
 
-		    // TO – viền xanh lá
-		    g2.setColor(new Color(50, 205, 50)); // LimeGreen
+		    
+		    // to
+		    g2.setColor(new Color(178, 34, 34)); 
 		    g2.drawRect(tx, ty, Board.SQUARE_SIZE, Board.SQUARE_SIZE);
+
+
 		}
 
 		for (Pieces p : pieces)

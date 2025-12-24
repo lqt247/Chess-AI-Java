@@ -8,6 +8,7 @@ import ai.AI;
 import java.util.List;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class GameController {
@@ -19,6 +20,8 @@ public class GameController {
 	private boolean lastMovePutKingInCheck = false;
 	// LỊCH SỬ - DANH SÁCH
 	private ArrayList<String> history = new ArrayList<>();
+
+	private HashMap<String, Integer> positionCount = new HashMap<>();
 
 	private AI ai; // AI tổng quát (SimpleAI / MinimaxAI)
 	private volatile boolean aiThinking = false; // tránh gọi AI liên tục
@@ -85,14 +88,28 @@ public class GameController {
 		if (controlPanel != null)
 			controlPanel.addMove(move);
 
-		// CHECK LẶP 3 nước
-		if (detectRepetition()) {
-			winner = "Hòa";
-			currentPlayer = -1;
-			if (controlPanel != null)
-				controlPanel.addMove("=== HÒA (Lặp 3 lần) ===");
-			return;
+		// 1. Check / Checkmate
+		checkCheckAndCheckmate(piece);
+		if (winner != null) return;
+
+		// 2. ĐỔI LƯỢT
+		currentPlayer = (piece.color == GamePanel.WHITE)
+		        ? GamePanel.BLACK
+		        : GamePanel.WHITE;
+
+		// 3. CHECK LẶP VỊ TRÍ (SAU KHI ĐỔI LƯỢT)
+		if (detectRepetitionByPosition()) {
+		    winner = "Hòa";
+		    currentPlayer = -1;
+		    if (controlPanel != null)
+		        controlPanel.addMove("=== HÒA (Lặp vị trí 3 lần) ===");
+		    return;
 		}
+
+		// 4. GỌI AI
+		callAIIfNeeded();
+
+
 
 		//  KIỂM TRA CHECK / CHECKMATE TRƯỚC KHI ĐỔI LƯỢT 
 		checkCheckAndCheckmate(piece);
@@ -216,14 +233,29 @@ public class GameController {
 
 	//
 	private String encodeBoard(ArrayList<Pieces> board, int turnColor) {
-		StringBuilder sb = new StringBuilder();
-		for (Pieces p : board) {
-			sb.append(p.getClass().getSimpleName()).append(p.color).append(p.col).append(p.row).append(";");
-		}
-		sb.append("T").append(turnColor);
-		return sb.toString();
+	    StringBuilder sb = new StringBuilder();
+
+	    board.stream()
+	        .sorted((a, b) -> {
+	            int c = a.getClass().getSimpleName()
+	                    .compareTo(b.getClass().getSimpleName());
+	            if (c != 0) return c;
+	            if (a.color != b.color) return a.color - b.color;
+	            if (a.col != b.col) return a.col - b.col;
+	            return a.row - b.row;
+	        })
+	        .forEach(p -> {
+	            sb.append(p.getClass().getSimpleName())
+	              .append(p.color)
+	              .append(p.col)
+	              .append(p.row)
+	              .append(";");
+	        });
+
+	    sb.append("T").append(turnColor);
+	    return sb.toString();
 	}
-	private String encodeMove(Pieces p, int[] mv) {
+ String encodeMove(Pieces p, int[] mv) {
 	    String colorName = (p.color == 1) ? "Trắng" : "Đen";
 	    String pieceName = p.getClass().getSimpleName();
 	    return pieceName + " (" + colorName + "): "
@@ -242,6 +274,8 @@ public class GameController {
 		gamePanel.clearLastMoveHighlight();
 		// XÓA LOG
 		moveLogger.clear();
+		
+		positionCount.clear();
 		// SET NGƯỜI CHƠI NÀ
 		currentPlayer = GamePanel.WHITE;
 		winner = null;
@@ -268,26 +302,14 @@ public class GameController {
 	}
 
 	// Hàm này dùng để check nếu quá 3 bước lập thì sẽ trả về HÒA nha
-	private boolean detectRepetition() {
-		// moveLoger
-		List<String> list = moveLogger.getMoves();
-		if (list.size() < 6)
-			return false;
+	private boolean detectRepetitionByPosition() {
+	    String key = encodeBoard(GamePanel.pieces, currentPlayer);
 
-		int n = list.size();
+	    int count = positionCount.getOrDefault(key, 0) + 1;
+	    positionCount.put(key, count);
 
-		// Lấy 3 cặp nước cuối
-		String a1 = list.get(n - 6);
-		String a2 = list.get(n - 5);
-
-		String b1 = list.get(n - 4);
-		String b2 = list.get(n - 3);
-
-		String c1 = list.get(n - 2);
-		String c2 = list.get(n - 1);
-
-		// So sánh xem 3 lần có giống nhau không
-		return a1.equals(b1) && a1.equals(c1) && a2.equals(b2) && a2.equals(c2);
+	    return count >= 3;
 	}
+
 
 }

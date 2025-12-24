@@ -23,7 +23,7 @@ public class Pieces {
         y = getY(row);
     }
 
-    // ===== GAME THẬT =====
+    // GAME THẬT 
     protected Pieces getPiecesAt(int col, int row) {
         for (Pieces p : GamePanel.pieces) {
             if (p.col == col && p.row == row)
@@ -32,7 +32,7 @@ public class Pieces {
         return null;
     }
 
-    // ===== AI / MINIMAX =====
+    //  AI 
     protected Pieces getPiecesAt(ArrayList<Pieces> list, int col, int row) {
         for (Pieces p : list) {
             if (p.col == col && p.row == row)
@@ -41,7 +41,7 @@ public class Pieces {
         return null;
     }
 
-    // ✅ COPY ĐÚNG LOẠI QUÂN
+    //  COPY ĐÚNG LOẠI QUÂN
     public Pieces copy() {
         if (this instanceof Pawn)   return new Pawn(color, col, row);
         if (this instanceof Rook)   return new Rook(color, col, row);
@@ -78,14 +78,14 @@ public class Pieces {
         return targetCol >= 0 && targetCol <= 7 && targetRow >= 0 && targetRow <= 7;
     }
 
-    // ===== BASE METHOD =====
+    // BASE METHOD 
     public boolean canMove(int targetCol, int targetRow) {
         if (!isWithInBoard(targetCol, targetRow)) return false;
         if (targetCol == col && targetRow == row) return false;
         return false;
     }
 
-    // ===== ALLY CHECK =====
+    // ALLY CHECK 
     protected boolean isAllyPiece(int targetCol, int targetRow) {
         Pieces target = getPiecesAt(targetCol, targetRow);
         return target != null && target.color == this.color;
@@ -128,8 +128,8 @@ public class Pieces {
         return getPiecesAtSim(board, col, row) == null;
     }
 
-    // ===== MẶC ĐỊNH CHO SIMULATION / AI =====
-    // ✅ Rất an toàn, không bao giờ đứng game
+    //MẶC ĐỊNH CHO SIMULATION / AI 
+    // Rất an toàn, không bao giờ đứng game
     public boolean canMoveSim(ArrayList<Pieces> board, int targetCol, int targetRow) {
         // Mặc định: chỉ kiểm tra ô trống / đồng minh, không logic quân
         if (!isWithInBoard(targetCol, targetRow)) return false;

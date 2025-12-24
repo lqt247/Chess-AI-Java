@@ -52,8 +52,11 @@ public class MinimaxAI implements AI {
             if (isRepeatMove(history, moveStr)) {
                 penalty = 5000;
             }
+            int finalScore = child.score;
+            if (turnColor == aiColor && isRepeatMove(history, moveStr)) {
+                finalScore -= 5000;
+            }
 
-            int finalScore = child.score - penalty;
             // ----------------------------------------------------------------------
 
             if (best == null) {
